@@ -9,6 +9,7 @@ module.exports = {
     ],
     ignore: [
       /^\/src/,
+      /^\/electron/,
       /^\/backend/,
       /^\/\.idea/,
       /^\/\.vscode/,
@@ -53,5 +54,29 @@ module.exports = {
       [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true,
       [FuseV1Options.OnlyLoadAppFromAsar]: true,
     }),
+    {
+      name: '@electron-forge/plugin-vite',
+      config: {
+        // `build` can specify multiple entry points to allow for multiple windows.
+        build: [
+          {
+            // `entry` is just an alias for `build.entry` in the Electron Forge API
+            entry: 'electron/main.js',
+            config: 'vite.main.config.ts',
+          },
+          {
+            entry: 'electron/preload.js',
+            config: 'vite.preload.config.ts',
+          },
+        ],
+        // `renderer` enables HMR and DevTools integration with Vite.
+        renderer: [
+          {
+            name: 'main_window',
+            config: 'vite.renderer.config.ts',
+          },
+        ],
+      },
+    },
   ],
 };

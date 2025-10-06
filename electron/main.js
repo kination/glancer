@@ -1,8 +1,8 @@
 import { app, BrowserWindow, Menu, Tray, nativeImage, ipcMain } from "electron";
 import path from "path";
 import { fileURLToPath } from "url";
-// import { authorize } from "./utils/auth.js";
-// import { listEmails } from "./gmail.js";
+import { authorize } from "./utils/auth.js";
+import { listEmails } from "./gmail.js";
 import { spawn } from "node:child_process";
 import axios from 'axios';
 
@@ -37,7 +37,7 @@ function createPythonProcess() {
     // 개발 모드: 가상환경의 python으로 app.py 실행
     // Windows와 macOS/Linux의 경로 차이를 고려합니다.
     const pythonExecutable = process.platform === 'win32' ? 'python.exe' : 'python';
-    scriptPath = path.join(__dirname, '..', 'backend', 'venv', 'bin', pythonExecutable);
+    scriptPath = path.join(__dirname, '..', 'backend', '.venv', 'bin', pythonExecutable);
     processArgs = [path.join(__dirname, '..', 'backend', 'app.py')];
     pythonProcess = spawn(scriptPath, processArgs);
   } else {
@@ -74,11 +74,12 @@ async function handleChatWithLLM(event, prompt) {
   }
 }
 
-// async function fetchAndLogEmails() {
-//   const auth = await authorize();
-//   const emails = await listEmails(auth);
-//   console.table(emails);
-// }
+async function fetchAndLogEmails() {
+  const auth = await authorize();
+  const emails = await listEmails(auth);
+  console.log("최근 24시간 이메일 목록:");
+  console.table(emails);
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -91,10 +92,10 @@ function createWindow() {
   });
 
   // Vite 개발 서버 URL 또는 빌드된 HTML 파일 로드
-  if (import.meta.env.VITE_DEV_SERVER_URL) {
-    mainWindow.loadURL(import.meta.env.VITE_DEV_SERVER_URL);
+  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+    mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
   } else {
-    mainWindow.loadFile(path.join(process.env.DIST, 'index.html'));
+    mainWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
   }
 
   mainWindow.on('closed', () => {

@@ -2,9 +2,9 @@
   "name": "glancer",
   "private": true,
   "version": "0.0.1",
-  "main": "electron/main.js",
+  "main": ".vite/build/main.js",
   "scripts": {
-    "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron electron/main.js\"",
+    "dev": "electron-forge start",
     "build": "npm run build:python && npm run build:electron",
     "build:python": "cd backend && . ./.venv/bin/activate && pyinstaller app.py --name backend_server --onefile --noconsole",
     "build:electron": "electron-forge make",
