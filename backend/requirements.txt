@@ -1,6 +1,5 @@
 fastapi
-uvicorn[standard]
+uvicorn
 ollama
 pydantic
 python-dotenv
-pyinstaller
