@@ -28,4 +28,6 @@ backend/.venv
 backend/build
 backend/backend_server.spec
 
+# package files
+.vite/
 out/

@@ -1,16 +1,11 @@
-import { app, BrowserWindow, Menu, Tray, nativeImage, ipcMain } from "electron";
-import path from "path";
-import { fileURLToPath } from "url";
-import { authorize } from "./utils/auth.js";
-import { listEmails } from "./gmail.js";
-import { spawn } from "node:child_process";
-import axios from 'axios';
+const { app, BrowserWindow, Menu, Tray, nativeImage, ipcMain } = require("electron");
+const path = require("path");
+const { spawn } = require("node:child_process");
+const axios = require('axios');
+// const { authorize } = require("./utils/auth.js");
+// const { listEmails } = require("./gmail.js");
 
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-process.env.DIST = path.join(__dirname, '../dist');
+// process.env.DIST = path.join(__dirname, '../dist'); // This is not needed with Vite plugin
 
 let mainWindow;
 let tray = null;
@@ -34,17 +29,15 @@ function createPythonProcess() {
   let processArgs = [];
 
   if (isDev) {
-    // 개발 모드: 가상환경의 python으로 app.py 실행
-    // Windows와 macOS/Linux의 경로 차이를 고려합니다.
+    console.log("Run dev mode")
     const pythonExecutable = process.platform === 'win32' ? 'python.exe' : 'python';
-    scriptPath = path.join(__dirname, '..', 'backend', '.venv', 'bin', pythonExecutable);
-    processArgs = [path.join(__dirname, '..', 'backend', 'app.py')];
+    scriptPath = path.resolve(__dirname, '..', '..', 'backend', '.venv', 'bin', pythonExecutable);
+    processArgs = [path.join(__dirname, '..', '..', 'backend', 'app.py')];
     pythonProcess = spawn(scriptPath, processArgs);
   } else {
-    // 프로덕션 모드: PyInstaller로 빌드된 실행 파일 실행
+    // Use package file generated with pyinstaller
     const executableName = process.platform === 'win32' ? 'backend_server.exe' : 'backend_server';
-    // extraResource로 패키징 시 process.resourcesPath에 위치합니다.
-    scriptPath = path.join(process.resourcesPath, 'backend', 'dist', executableName);
+    scriptPath = path.join(process.resourcesPath, executableName);
     pythonProcess = spawn(scriptPath);
   }
 
@@ -61,7 +54,7 @@ function createPythonProcess() {
   });
 }
 
-// LLM에 채팅 메시지를 보내는 IPC 핸들러
+// Send chat message to backend
 async function handleChatWithLLM(event, prompt) {
   try {
     const response = await axios.post('http://127.0.0.1:5001/api/chat', {
@@ -74,24 +67,23 @@ async function handleChatWithLLM(event, prompt) {
   }
 }
 
-async function fetchAndLogEmails() {
-  const auth = await authorize();
-  const emails = await listEmails(auth);
-  console.log("최근 24시간 이메일 목록:");
-  console.table(emails);
-}
+// async function fetchAndLogEmails() {
+//   const auth = await authorize();
+//   const emails = await listEmails(auth);
+//   console.log("최근 24시간 이메일 목록:");
+//   console.table(emails);
+// }
 
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
-    show: false, // Ready-to-show 이벤트를 위해 초기에 숨김
+    show: false, // Hide for "ready-to-show" event
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     },
   });
 
-  // Vite 개발 서버 URL 또는 빌드된 HTML 파일 로드
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
   } else {
@@ -102,8 +94,7 @@ function createWindow() {
     mainWindow = null;
   });
 
-  // Tray (상단 아이콘)
-  const imagePath = path.join(__dirname, 'assets', 'iconTemplate.png') // 경로 예시
+  const imagePath = path.join(__dirname, 'assets', 'iconTemplate.png')
   const originalImage = nativeImage.createFromPath(imagePath);
 
   // Resize the image to a specific width and height
@@ -120,25 +111,25 @@ function createWindow() {
 }
 
 app.whenReady().then(async() => {
-  createPythonProcess(); // Python 프로세스 시작
-  ipcMain.handle('chat-llm', handleChatWithLLM); // IPC 핸들러 등록
+  createPythonProcess(); // run python process
+  ipcMain.handle('chat-llm', handleChatWithLLM); // IPC handler
   createWindow();
   // await fetchAndLogEmails();
 
   app.on('activate', () => {
-    // macOS에서 독 아이콘을 클릭했을 때 창이 없으면 새로 생성
+    // Create window if not exists when click dock image at macOS
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 });
 
 app.on('quit', () => {
-  // 앱 종료 시 Python 프로세스도 함께 종료
+  // Shutdown python process when quit
   if (pythonProcess) {
     pythonProcess.kill();
   }
 });
 
 app.on('window-all-closed', () => {
-  // macOS에서는 명시적 종료 전까진 앱 유지
+  // keep application until quit at macOS
   if (process.platform !== 'darwin') app.quit();
 });
