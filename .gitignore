@@ -27,3 +27,5 @@ dist-ssr
 backend/.venv
 backend/build
 backend/backend_server.spec
+
+out/
