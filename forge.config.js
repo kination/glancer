@@ -4,18 +4,17 @@ const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 module.exports = {
   packagerConfig: {
     asar: true,
-    // PyInstaller로 빌드된 Python 실행 파일을 포함시키기 위한 설정
     extraResource: [
       './backend/dist/backend_server'
     ],
-    // 패키징 시 불필요한 파일을 제외하여 용량 최적화
     ignore: [
       /^\/src/,
       /^\/backend/,
       /^\/\.idea/,
       /^\/\.vscode/,
       /^\/\.git/,
-      /^\/README\.md/,
+      /.*\\.md$/,
+      /.*\\.map$/,
       /^\/node_modules\/\.bin/,
     ]
   },
