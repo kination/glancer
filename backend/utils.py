@@ -30,13 +30,16 @@ def find_ollama_executable():
     Search order:
     1. Bundled with PyInstaller (_MEIPASS).
     2. A local 'bin' directory within the project.
-    3. System's PATH.
+    (Deleted) 3. System's PATH. <- Removed for security concern
     """
     # Case 1: Bundled with PyInstaller. `_MEIPASS` is a temporary directory created by PyInstaller.
     if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-        bundle_dir = sys._MEIPASS
-        ollama_path = os.path.join(bundle_dir, 'ollama.exe' if platform.system() == "Windows" else 'ollama')
+        # In a packaged app, 'ollama' is an external resource next to the main executable.
+        # sys.executable is the path to 'backend_server'. We look in the same directory.
+        executable_dir = os.path.dirname(sys.executable)
+        ollama_path = os.path.join(executable_dir, 'ollama.exe' if platform.system() == "Windows" else 'ollama')
         if os.path.exists(ollama_path):
+            print(f"Found packaged ollama executable: {ollama_path}")
             return ollama_path
 
     # Case 2: Local development - check for an executable in a project 'bin' directory.
@@ -46,10 +49,10 @@ def find_ollama_executable():
         return local_bin_path
 
     # Case 3: Fallback to system PATH.
-    from shutil import which
-    ollama_path = which('ollama')
-    if ollama_path:
-        return ollama_path
+    # from shutil import which
+    # ollama_path = which('ollama')
+    # if ollama_path:
+    #     return ollama_path
     
     return None
 

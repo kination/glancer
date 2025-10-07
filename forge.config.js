@@ -5,7 +5,8 @@ module.exports = {
   packagerConfig: {
     asar: true,
     extraResource: [
-      './backend/dist/backend_server'
+      './backend/dist/backend_server',
+      './backend/bin/ollama'
     ],
     ignore: [
       /^\/src/,
