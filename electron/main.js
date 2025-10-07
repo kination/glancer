@@ -17,13 +17,11 @@ const contextMenu = Menu.buildFromTemplate([
   },
 ]);
 
-// Python 자식 프로세스를 저장할 변수
+// child process for python
 let pythonProcess = null;
 
 function createPythonProcess() {
-  // PyInstaller로 빌드된 실행 파일을 사용하도록 경로를 설정합니다.
-  // electron-forge를 사용한다고 가정하고 extraResource 경로를 사용합니다.
-  const isDev = !app.isPackaged; // 개발 모드인지 확인
+  const isDev = !app.isPackaged;
 
   let scriptPath;
   let processArgs = [];
@@ -70,7 +68,6 @@ async function handleChatWithLLM(event, prompt) {
 // async function fetchAndLogEmails() {
 //   const auth = await authorize();
 //   const emails = await listEmails(auth);
-//   console.log("최근 24시간 이메일 목록:");
 //   console.table(emails);
 // }
 
@@ -94,7 +91,7 @@ function createWindow() {
     mainWindow = null;
   });
 
-  const imagePath = path.join(__dirname, 'assets', 'iconTemplate.png')
+  const imagePath = path.join(__dirname, '..', 'assets', 'iconTemplate.png')
   const originalImage = nativeImage.createFromPath(imagePath);
 
   // Resize the image to a specific width and height
@@ -111,6 +108,7 @@ function createWindow() {
 }
 
 app.whenReady().then(async() => {
+  app.dock.setIcon(path.join(__dirname, '../../electron', 'assets', 'dock-icon.png')) 
   createPythonProcess(); // run python process
   ipcMain.handle('chat-llm', handleChatWithLLM); // IPC handler
   createWindow();
