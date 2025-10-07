@@ -91,7 +91,7 @@ function createWindow() {
     mainWindow = null;
   });
 
-  const imagePath = path.join(__dirname, '..', 'assets', 'iconTemplate.png')
+  const imagePath = path.join(__dirname, '../../electron', 'assets', 'iconTemplate.png')
   const originalImage = nativeImage.createFromPath(imagePath);
 
   // Resize the image to a specific width and height
@@ -108,7 +108,7 @@ function createWindow() {
 }
 
 app.whenReady().then(async() => {
-  app.dock.setIcon(path.join(__dirname, '../../electron', 'assets', 'dock-icon.png')) 
+  // app.dock.setIcon(path.join(__dirname, '../../electron', 'assets', 'dock-icon.png')) 
   createPythonProcess(); // run python process
   ipcMain.handle('chat-llm', handleChatWithLLM); // IPC handler
   createWindow();
