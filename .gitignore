@@ -27,6 +27,8 @@ dist-ssr
 backend/.venv
 backend/build
 backend/backend_server.spec
+backend/__pycache__
+src-tauri/binaries
 
 # package files
 .vite/

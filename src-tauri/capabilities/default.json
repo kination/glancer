@@ -1,0 +1,15 @@
+{
+  "identifier": "default",
+  "permissions": [
+    "core:default",
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "name": "binaries/backend_server",
+          "sidecar": true
+        }
+      ]
+    }
+  ]
+}
